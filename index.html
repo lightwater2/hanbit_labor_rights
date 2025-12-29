@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>노동인권 - 여러분의 목소리를 올려주세요</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="scroll-container">
+        <!-- Interactive Visual Section -->
+        <section id="hero" class="sticky-section">
+            <div class="visual-wrapper">
+                <div class="voice-icon-container">
+                    <svg id="voice-icon" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <!-- Speaker Body -->
+                        <path class="speaker-base" d="M30,40 L45,40 L60,25 L60,75 L45,60 L30,60 Z"
+                            fill="currentColor" />
+                        <!-- Mute Line -->
+                        <line id="mute-line" x1="35" y1="35" x2="65" y2="65" stroke="currentColor" stroke-width="4"
+                            stroke-linecap="round" />
+                        <!-- Sound Waves (Radial arcs) -->
+                        <g id="sound-waves" class="hidden" fill="none" stroke="currentColor" stroke-width="4"
+                            stroke-linecap="round">
+                            <path class="wave-arc" d="M70,40 Q75,50 70,60" />
+                            <path class="wave-arc" d="M80,30 Q90,50 80,70" />
+                            <path class="wave-arc" d="M90,20 Q105,50 90,80" />
+                        </g>
+                    </svg>
+                </div>
+                <div class="text-content">
+                    <h1 id="main-title">여러분의 목소리를 올려주세요</h1>
+                    <p id="sub-title">우리는 모두 존엄한 노동의 주체입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Information Sections -->
+        <section id="about" class="content-section">
+            <div class="container">
+                <h2>노동인권이란?</h2>
+                <p>노동자가 인간으로서의 존엄성을 유지하며 일할 수 있는 권리입니다. <br>정당한 임금, 안전한 환경, 그리고 자유로운 의사표현이 보장되어야 합니다.</p>
+            </div>
+        </section>
+
+        <!-- New Scroll Reveal Story Section -->
+        <section id="story" class="scroll-reveal-section">
+            <div class="reveal-container">
+                <p class="reveal-text">
+                    우리는 매일 아침 길을 나섭니다. 우리 곁을 지나가는 수많은 사람들, 그들은 누군가의 부모이자 자녀이며, 친구입니다.
+                    화려한 도심의 빌딩 숲에서, 뜨거운 열기가 가득한 공장의 컨베이어 벨트 앞에서, 차가운 바람이 부는 공사 현장의 높은 곳에서,
+                    묵묵히 자신의 자리를 지키며 땀 흘리는 모든 노동의 순간들은 그 자체로 숭고한 가치를 지닙니다.
+                    하지만 때로는 그들의 헌신이 당연하게 여겨지기도 하고, 때로는 보이지 않는 그들의 수고가 잊혀지기도 합니다.
+                    노동은 단순히 생계를 위한 수단을 넘어 자아를 실현하고 우리 사회를 지탱하는 가장 강력한 뿌리입니다.
+                    그 뿌리가 건강하게 자랄 때 우리 사회라는 나무는 비로소 풍성한 결실을 맺을 수 있습니다.
+                    이제 우리는 그들의 목소리에 귀를 기울여야 합니다. 당연한 권리가 당연하게 지켜지는 세상을 위해,
+                    존엄한 노동이 제대로 대우받는 내일을 위해, 우리 모두가 함께 연대하고 행동해야 할 때입니다.
+                    여러분의 목소리가 모여 더 큰 울림이 되고, 그 울림이 세상을 바꾸는 변화의 시작이 될 것입니다.
+                </p>
+            </div>
+        </section>
+
+        <section id="stats" class="content-section dark-variant">
+            <div class="container">
+                <div class="stats-header">
+                    <h2>숫자로 보는 현실</h2>
+                    <p>우리가 외면하고 있는 오늘의 기록입니다.</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number"><span class="counter" data-target="1915">0</span>시간</div>
+                        <div class="stat-label">OECD 최장 수준 연간 노동시간</div>
+                        <p class="stat-desc">휴식 없는 하루는 권리가 아닌 희생이 되고 있습니다.</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number"><span class="counter" data-target="2000">0</span>명+</div>
+                        <div class="stat-label">매년 발생하는 일터의 죽음</div>
+                        <p class="stat-desc">오늘도 누군가는 집으로 돌아가지 못했습니다.</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number"><span class="counter" data-target="1.7">0</span>조 원</div>
+                        <div class="stat-label">연간 임금 체불 규모</div>
+                        <p class="stat-desc">열심히 일한 대가가 누락되는 부조리가 반복됩니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="action" class="content-section">
+            <div class="container">
+                <div class="card-grid">
+                    <div class="info-card">
+                        <h3>정당한 대우</h3>
+                        <p>일한 만큼의 가치를 존중받고 정당한 보상을 받는 것은 가장 기본적인 권리입니다.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>안전한 환경</h3>
+                        <p>모든 노동자는 신체적, 정신적으로 안전한 환경에서 업무에 집중할 권리가 있습니다.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>연대의 힘</h3>
+                        <p>혼자가 아닌 함께 목소리를 낼 때, 더 나은 노동 환경을 만들 수 있습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Labor Rights. All Rights Reserved.</p>
+        </footer>
+    </div>
+    <script src="main.js"></script>
+</body>
+
+</html>
