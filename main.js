@@ -2,7 +2,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const hero = document.querySelector('#hero');
     const muteLine = document.querySelector('#mute-line');
     const soundWaves = document.querySelector('#sound-waves');
-    const textContent = document.querySelector('.text-content');
+    // Force scroll to top on refresh
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
     const body = document.body;
 
     // Text Splitting for Typewriter Effect
@@ -20,18 +25,234 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const mainTitle = document.querySelector('#main-title');
-    const subTitle = document.querySelector('#sub-title');
-    splitText(mainTitle);
-    splitText(subTitle);
+    if (mainTitle) {
+        splitText(mainTitle);
+    }
 
     // Create Cursor
     const cursor = document.createElement('span');
     cursor.className = 'cursor';
     cursor.innerText = '|';
-    // Position it initially
-    mainTitle.appendChild(cursor);
+
+    // Keyboard Typing Sound (Cheerful & Crisp Clack)
+    let audioCtx = null;
+    const playTypingSound = () => {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        const t = audioCtx.currentTime;
+
+        // 1. 선명한 고주파 클릭 (Crisp High-end)
+        const bufferSize = audioCtx.sampleRate * 0.015; // 15ms (더 짧고 snappy하게)
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
+        const noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = 'highpass';
+        noiseFilter.frequency.setValueAtTime(3800, t); // 더 높은 주파수 대역
+
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.25, t);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
+
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+
+        // 2. 밝은 금속성 공명 (Bright Resonance)
+        const osc = audioCtx.createOscillator();
+        osc.type = 'triangle'; // Square보다 약간 더 부드럽지만 선명하게
+        osc.frequency.setValueAtTime(1400 + Math.random() * 600, t); // 피치 상향 조정
+
+        const oscGain = audioCtx.createGain();
+        oscGain.gain.setValueAtTime(0.04, t);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.012);
+
+        osc.connect(oscGain);
+        oscGain.connect(audioCtx.destination);
+
+        noise.start(t);
+        osc.start(t);
+        osc.stop(t + 0.015);
+    };
+
+    // Auto-animate speaker icon (1.5 seconds)
+    const animateSpeaker = () => {
+        const duration = 1500; // 1.5 seconds
+        const startTime = Date.now();
+        const muteLine = document.querySelector('#mute-line');
+        const soundWaves = document.querySelector('#sound-waves');
+        const waveArcs = soundWaves.querySelectorAll('.wave-arc');
+
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // 1. Mute line disappears (0% to 30% of 1.5s)
+            const muteProgress = Math.min(progress / 0.3, 1);
+            muteLine.style.opacity = 1 - muteProgress;
+            muteLine.style.transform = `translate(${muteProgress * 20}px, -${muteProgress * 20}px)`;
+
+            // 2. Sound waves appear (30% to 100% of 1.5s)
+            if (progress >= 0.3) {
+                soundWaves.classList.remove('hidden');
+                soundWaves.style.opacity = 1;
+
+                const waveProgress = (progress - 0.3) / 0.7;
+                waveArcs.forEach((arc, index) => {
+                    const threshold = index / waveArcs.length;
+                    if (waveProgress > threshold) {
+                        arc.classList.add('visible');
+                    }
+                });
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        return new Promise((resolve) => {
+            animate();
+            setTimeout(resolve, duration);
+        });
+    };
+
+    // Auto-typing animation for main title (1.8 seconds)
+    const animateTypewriter = () => {
+        const titleChars = mainTitle.querySelectorAll('.char');
+        const duration = 1800; // 1.8 seconds
+        const startTime = Date.now();
+        let lastRevealedIndex = -1;
+
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            let lastVisibleChar = null;
+
+            cursor.classList.add('visible');
+
+            titleChars.forEach((char, index) => {
+                const threshold = parseFloat(char.dataset.threshold);
+                if (progress > threshold) {
+                    if (!char.classList.contains('visible')) {
+                        char.classList.add('visible');
+                        // Play sound when a new character appears (skip for spaces)
+                        if (index > lastRevealedIndex) {
+                            const isSpace = char.innerText === '\u00A0' || char.innerText === ' ';
+                            if (!isSpace) {
+                                playTypingSound();
+                            }
+                            lastRevealedIndex = index;
+                        }
+                    }
+                    lastVisibleChar = char;
+                } else {
+                    char.classList.remove('visible');
+                }
+            });
+
+            // Position cursor after the last visible character, or before first if none visible
+            if (lastVisibleChar) {
+                if (cursor.previousSibling !== lastVisibleChar) {
+                    lastVisibleChar.after(cursor);
+                }
+            } else {
+                // No characters visible yet, put cursor at the beginning
+                const firstChar = titleChars[0];
+                if (firstChar && cursor.nextSibling !== firstChar) {
+                    firstChar.before(cursor);
+                }
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        return new Promise((resolve) => {
+            animate();
+            setTimeout(resolve, duration);
+        });
+    };
 
     const maxScroll = hero.offsetHeight - window.innerHeight;
+
+    // Initially lock scroll
+    document.body.classList.add('no-scroll');
+
+    // Start experience on click
+    let experienceStarted = false;
+    const startExperience = async () => {
+        if (experienceStarted) return;
+        experienceStarted = true;
+
+        // Unlock audio context
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        // Show "화면 너머 듣는" Header & Brand Logo
+        const heroMain = document.querySelector('.hero-main');
+        const brandLogo = document.querySelector('.brand-logo');
+        if (heroMain) heroMain.style.opacity = '1';
+        if (brandLogo) brandLogo.style.opacity = '1';
+
+        // Update Interaction Guide
+        const guide = document.querySelector('#interaction-guide');
+        if (guide) {
+            const guideText = guide.querySelector('.guide-text');
+            const chevrons = guide.querySelector('.chevrons');
+            if (guideText) guideText.innerText = '스크롤하여 더 보기';
+            if (chevrons) {
+                chevrons.classList.remove('up');
+                chevrons.classList.add('down');
+            }
+        }
+
+        // Step 1: Animate Speaker (1.5s)
+        await animateSpeaker();
+
+        // Step 2: Animate Typewriter (1.8s)
+        if (mainTitle) {
+            mainTitle.style.opacity = '1';
+            await animateTypewriter();
+        }
+
+        // Step 3: Unlock scroll only AFTER typing is done
+        document.body.classList.remove('no-scroll');
+
+        // Reveal other sections
+        const hiddenElements = document.querySelectorAll('.content-section, #gallery-section, .scroll-reveal-section, footer');
+        hiddenElements.forEach(el => el.style.opacity = '1');
+
+        // Add scroll listener to hide guide after experience starts
+        const handleGuideHide = () => {
+            if (window.scrollY > 100) {
+                if (guide) guide.classList.add('hidden');
+                window.removeEventListener('scroll', handleGuideHide);
+            }
+        };
+        window.addEventListener('scroll', handleGuideHide);
+
+        // Remove trigger listeners
+        ['click', 'touchstart'].forEach(evt => {
+            window.removeEventListener(evt, startExperience);
+        });
+    };
+
+    // Only click or touch to start (to satisfy audio policies and UI state)
+    ['click', 'touchstart'].forEach(evt => {
+        window.addEventListener(evt, startExperience, { once: true, passive: true });
+    });
 
     window.addEventListener('scroll', () => {
         const scrollY = window.scrollY;
@@ -39,84 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Progress from 0 to 1 based on the first sticky section
         let progress = Math.min(scrollY / maxScroll, 1);
 
-        // 1. Background Color Transition (Black to #f8f9fa)
-        const bgVal = Math.round(progress * 248);
-        body.style.backgroundColor = `rgb(${bgVal}, ${bgVal}, ${bgVal})`;
-
-        // 2. Text Color Transition (White to #121212)
-        const textVal = 255 - Math.round(progress * (255 - 18));
-        body.style.color = `rgb(${textVal}, ${textVal}, ${textVal})`;
-
-        // 3. Mute Line Animation (0% to 30% progress)
-        if (progress < 0.3) {
-            const lineOpacity = 1 - (progress / 0.3);
-            const lineTranslate = (progress / 0.3) * 20;
-            muteLine.style.opacity = lineOpacity;
-            muteLine.style.transform = `translate(${lineTranslate}px, -${lineTranslate}px)`;
-            soundWaves.classList.add('hidden');
-        } else {
-            muteLine.style.opacity = 0;
-            soundWaves.classList.remove('hidden');
-        }
-
-        // 4. Sound Waves Animation (30% to 60% progress)
-        if (progress >= 0.3) {
-            const waveArcs = soundWaves.querySelectorAll('.wave-arc');
-            const waveProgress = Math.min((progress - 0.3) / 0.3, 1);
-
-            waveArcs.forEach((arc, index) => {
-                const threshold = index / waveArcs.length;
-                if (waveProgress > threshold) {
-                    arc.classList.add('visible');
-                } else {
-                    arc.classList.remove('visible');
-                }
-            });
-
-            soundWaves.style.opacity = 1;
-        }
-
-        // 5. Typewriter Text Reveal (50% to 100% progress)
-        if (progress > 0.5) {
-            textContent.style.opacity = 1;
-
-            // A. Main Title Reveal (50% to 80%)
-            const titleProgress = Math.min(Math.max((progress - 0.5) / 0.3, 0), 1);
-            const titleChars = mainTitle.querySelectorAll('.char');
-            let lastTitleChar = null;
-
-            cursor.classList.add('visible');
-
-            titleChars.forEach((char) => {
-                const threshold = parseFloat(char.dataset.threshold);
-                if (titleProgress > threshold) {
-                    char.classList.add('visible');
-                    lastTitleChar = char;
-                } else {
-                    char.classList.remove('visible');
-                }
-            });
-
-            if (lastTitleChar && cursor.previousSibling !== lastTitleChar) {
-                lastTitleChar.after(cursor);
-            }
-
-            // B. Subtitle Reveal (80% to 100%)
-            const subProgress = Math.min(Math.max((progress - 0.8) / 0.2, 0), 1);
-            const subChars = subTitle.querySelectorAll('.char');
-
-            subChars.forEach((char) => {
-                const threshold = parseFloat(char.dataset.threshold);
-                if (subProgress > threshold) {
-                    char.classList.add('visible');
-                } else {
-                    char.classList.remove('visible');
-                }
-            });
-        } else {
-            textContent.style.opacity = 0;
-            cursor.classList.remove('visible');
-        }
+        // Mute animation is now time-sequenced on start
+        // Keeping scroll logic for other sections (stats, reveal etc)
     });
 
     // 6. Statistics Count-Up Animation
@@ -158,18 +303,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const revealText = document.querySelector('.reveal-text');
 
     if (revealText) {
-        const text = revealText.innerText;
+        const paragraphs = revealText.innerHTML.split(/<br\s*\/?>\s*<br\s*\/?>/i);
         revealText.innerHTML = '';
-        const words = text.split(/\s+/);
-        words.forEach(word => {
-            const span = document.createElement('span');
-            span.className = 'reveal-word';
-            span.innerText = word;
-            revealText.appendChild(span);
-            revealText.appendChild(document.createTextNode(' '));
+
+        paragraphs.forEach((pText, pIndex) => {
+            const pDiv = document.createElement('div');
+            pDiv.className = 'reveal-paragraph';
+
+            // Clean up text and split by words
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = pText;
+            const words = tempDiv.innerText.trim().split(/\s+/);
+
+            words.forEach(word => {
+                const span = document.createElement('span');
+                span.className = 'reveal-word';
+                span.innerText = word;
+                pDiv.appendChild(span);
+                pDiv.appendChild(document.createTextNode(' '));
+            });
+
+            revealText.appendChild(pDiv);
         });
 
-        const revealWords = document.querySelectorAll('.reveal-word');
         const handleRevealScroll = () => {
             const viewportHeight = window.innerHeight;
             const revealWords = document.querySelectorAll('.reveal-word');
@@ -202,6 +358,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initial run
         handleRevealScroll();
     }
+
+    // 8. Initialize Masonry Gallery with CSV Data
+    const initGallery = async () => {
+        const data = await DataLoader.getAllData();
+        if (data && data.quotes) {
+            new MasonryGallery('gallery-container', data.quotes);
+        }
+    };
+
+    initGallery();
 
     // Initial check
     window.dispatchEvent(new Event('scroll'));
