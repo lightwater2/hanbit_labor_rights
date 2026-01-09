@@ -17,12 +17,33 @@
 </head>
 
 <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <img src="logo-loading.png" alt="로딩 중" class="loading-logo">
+            <div class="loading-progress-container">
+                <div class="loading-progress-bar" id="loading-progress-bar"></div>
+            </div>
+            <p class="loading-text">콘텐츠를 불러오는 중...</p>
+        </div>
+    </div>
+
     <div id="scroll-container">
         <div id="labor-rights-app">
-            <!-- Brand Logo (Hidden initially) -->
-            <div class="brand-logo">
-                <img src="logo.png" alt="한빛미디어노동인권센터">
-            </div>
+            <!-- Top Navigation Bar -->
+            <header class="top-navbar">
+                <div class="navbar-content">
+                    <div class="brand-logo">
+                        <img src="logo.png" alt="한빛미디어노동인권센터">
+                    </div>
+                    <nav class="navbar-menu">
+                        <a href="#story" class="nav-link" data-section="story">이야기</a>
+                        <a href="#stats" class="nav-link" data-section="stats">현실</a>
+                        <a href="#flipping-cards-section" class="nav-link" data-section="flipping-cards-section">목소리</a>
+                        <a href="#interview-history" class="nav-link" data-section="interview-history">인터뷰</a>
+                    </nav>
+                </div>
+            </header>
 
             <!-- Interactive Visual Section -->
             <section id="hero" class="sticky-section">
@@ -78,7 +99,7 @@
                 <section id="stats" class="content-section dark-variant">
                     <div class="container">
                         <div class="stats-header">
-                            <h2>숫자로 보는 현실</h2>
+                            <h2>숫자로 보는 방송미디어노동자들의 현실</h2>
                             <p>우리가 외면하고 있는 오늘의 기록입니다.</p>
                         </div>
                         <div class="stats-grid">
@@ -113,41 +134,123 @@
                     </div>
                 </section>
 
-                <!-- Interactive Masonry Gallery Section -->
-                <section id="gallery-section">
-                    <h2 class="gallery-title">노동자의 목소리, 입체적인 울림</h2>
-                    <div id="gallery-container"></div>
-                </section>
-
-                <!-- Information Sections -->
-                <section id="about" class="content-section">
+                <!-- Flipping Cards Section -->
+                <section id="flipping-cards-section" class="content-section">
                     <div class="container">
-                        <h2>노동인권이란?</h2>
-                        <p>노동자가 인간으로서의 존엄성을 유지하며 일할 수 있는 권리입니다. <br>정당한 임금, 안전한 환경, 그리고 자유로운 의사표현이 보장되어야 합니다.</p>
-                    </div>
-                </section>
+                        <h2 class="section-title">현장의 목소리</h2>
+                        <div class="filter-section">
+                            <div class="filter-group" data-category="업종">
+                                <span class="filter-label">업종</span>
+                                <div class="filter-options" id="filter-sector">
+                                    <!-- Dynamic sectors -->
+                                </div>
+                            </div>
+                            <div class="filter-group" data-category="직군">
+                                <span class="filter-label">직군</span>
+                                <div class="filter-options" id="filter-job">
+                                    <!-- Dynamic jobs -->
+                                </div>
+                            </div>
+                            <div class="filter-group" data-category="주제">
+                                <span class="filter-label">주제</span>
+                                <div class="filter-options" id="filter-topic">
+                                    <!-- Dynamic topics -->
+                                </div>
+                            </div>
+                        </div>
 
-                <section id="action" class="content-section">
-                    <div class="container">
-                        <div class="card-grid">
-                            <div class="info-card">
-                                <h3>정당한 대우</h3>
-                                <p>일한 만큼의 가치를 존중받고 정당한 보상을 받는 것은 가장 기본적인 권리입니다.</p>
-                            </div>
-                            <div class="info-card">
-                                <h3>안전한 환경</h3>
-                                <p>모든 노동자는 신체적, 정신적으로 안전한 환경에서 업무에 집중할 권리가 있습니다.</p>
-                            </div>
-                            <div class="info-card">
-                                <h3>연대의 힘</h3>
-                                <p>혼자가 아닌 함께 목소리를 낼 때, 더 나은 노동 환경을 만들 수 있습니다.</p>
+                        <div class="flipping-cards-grid" id="flipping-cards-grid">
+                            <!-- Dynamically populated from quotes.csv -->
+                        </div>
+
+                        <!-- Mobile Card Stack (visible only on mobile) -->
+                        <div class="mobile-card-stack" id="mobile-card-stack">
+                            <div class="stack-wrapper">
+                                <button class="stack-arrow prev" id="stack-prev">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                <div class="stack-container" id="stack-container">
+                                    <!-- Cards will be dynamically populated -->
+                                </div>
+                                <button class="stack-arrow next" id="stack-next">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <footer>
-                    <p>&copy; 2025 Labor Rights. All Rights Reserved.</p>
+                <!-- Sticky Scroll Reveal Section -->
+                <section id="interview-history" class="sticky-reveal-section">
+                    <div class="sticky-reveal-container">
+                        <h2 class="sticky-reveal-title">한빛센터는 그동안 이런 인터뷰를 해왔습니다.</h2>
+
+                        <div class="sticky-reveal-content">
+                            <div class="sticky-reveal-left">
+                                <div class="reveal-item" data-index="0">
+                                    <h3>2023~2024 한빛센터가 간다</h3>
+                                    <p>방송미디어 현장을 직접 찾아가 노동자들의 목소리를 담았습니다. 드라마, 예능, 시사 등 다양한 제작 현장에서 일하는 스태프들의 생생한 이야기를 기록했습니다.</p>
+                                </div>
+                                <div class="reveal-item" data-index="1">
+                                    <h3>2024 예능작가 실태조사</h3>
+                                    <p>예능 프로그램의 핵심 인력인 작가들의 근무 환경과 처우를 조사했습니다. 임금 체불, 장시간 노동, 불안정한 고용 형태 등 구조적 문제점을 밝혀냈습니다.</p>
+                                </div>
+                                <div class="reveal-item" data-index="2">
+                                    <h3>2024 고용불안 실태조사</h3>
+                                    <p>프리랜서와 계약직으로 일하는 방송 종사자들의 고용 불안정 실태를 심층 분석했습니다. 연간 평균 4개월 이상의 실업 상태를 경험하는 현실을 드러냈습니다.</p>
+                                </div>
+                                <div class="reveal-item" data-index="3">
+                                    <h3>2024 유튜브 영상 편집자 심층인터뷰</h3>
+                                    <p>새로운 미디어 환경에서 일하는 유튜브 영상 편집자들을 만났습니다. 24시간 대기, 낮은 단가, 불명확한 계약 관계 등 플랫폼 노동의 그림자를 조명했습니다.</p>
+                                </div>
+                                <div class="reveal-item" data-index="4">
+                                    <h3>2025 유튜브 크리에이터 면접조사</h3>
+                                    <p>1인 미디어 시대의 크리에이터들이 겪는 수익 불안정과 번아웃 문제를 다뤘습니다. 월 평균 143만원의 소득과 끊임없는 콘텐츠 압박의 현실을 기록했습니다.</p>
+                                </div>
+                                <div class="reveal-item" data-index="5">
+                                    <h3>엔터테인먼트 종사자 면접조사</h3>
+                                    <p>K-POP과 한류의 이면에서 일하는 엔터테인먼트 종사자들의 이야기입니다. 매니저, 스타일리스트, 안무가 등 보이지 않는 곳에서 일하는 이들의 노동 현실을 담았습니다.</p>
+                                </div>
+                            </div>
+
+                            <div class="sticky-reveal-right">
+                                <div class="sticky-image-container">
+                                    <img src="picture1.jpg" alt="2023~2024 한빛센터가 간다" class="sticky-image active" data-index="0">
+                                    <img src="picture2.JPG" alt="2024 예능작가 실태조사" class="sticky-image" data-index="1">
+                                    <img src="picture3.jpg" alt="2024 고용불안 실태조사" class="sticky-image" data-index="2">
+                                    <img src="picture4.jpg" alt="2024 유튜브 영상 편집자 심층인터뷰" class="sticky-image" data-index="3">
+                                    <img src="picture5.jpg" alt="2025 유튜브 크리에이터 면접조사" class="sticky-image" data-index="4">
+                                    <img src="picture6.JPG" alt="엔터테인먼트 종사자 면접조사" class="sticky-image" data-index="5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="site-footer">
+                    <div class="footer-container">
+                        <div class="footer-info">
+                            <div class="footer-row">
+                                <span class="label">기획/구성</span>
+                                <span class="content">한빛미디어노동인권센터</span>
+                            </div>
+                            <div class="footer-row">
+                                <span class="label">개발/디자인</span>
+                                <span class="content">프래그코드</span>
+                            </div>
+                            <div class="footer-row">
+                                <span class="label">제보/문의</span>
+                                <span class="content">hanbitcenter@gmail.com, 1833-8261</span>
+                            </div>
+                        </div>
+                        <div class="footer-support">
+                            <p>※ 이 웹페이지는 아름다운재단의 지원을 받았습니다.</p>
+                        </div>
+                    </div>
                 </footer>
         </div>
         <div id="interaction-guide" class="interaction-guide">
