@@ -151,10 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Auto-typing animation for main title (1.8 seconds)
+    // Auto-typing animation for main title (1.2 seconds)
     const animateTypewriter = () => {
         const titleChars = mainTitle.querySelectorAll('.char');
-        const duration = 1800; // 1.8 seconds
+        const duration = 1200; // 1.2 seconds (1.5x faster)
         const startTime = Date.now();
         let lastRevealedIndex = -1;
 
@@ -217,8 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Start experience on click
     let experienceStarted = false;
+    let loadingComplete = false; // Flag to track loading status
     const startExperience = async () => {
         if (experienceStarted) return;
+        if (!loadingComplete) return; // Prevent starting before loading completes
         experienceStarted = true;
 
         // Unlock audio context
@@ -276,10 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Only click or touch to start (to satisfy audio policies and UI state)
-    ['click', 'touchstart'].forEach(evt => {
-        window.addEventListener(evt, startExperience, { once: true, passive: true });
-    });
+    // startExperience will be registered after loading completes (in initAll)
 
     window.addEventListener('scroll', () => {
         const scrollY = window.scrollY;
@@ -360,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
             revealWords.forEach(word => {
                 const rect = word.getBoundingClientRect();
                 const wordCenter = rect.top + rect.height / 2;
-                const viewportCenter = viewportHeight / 2;
+                const viewportCenter = viewportHeight * 0.75;
 
                 // Distance from viewport center (normalized)
                 const distanceFromCenter = (wordCenter - viewportCenter) / (viewportHeight / 2);
@@ -399,6 +398,27 @@ document.addEventListener('DOMContentLoaded', () => {
         '업종': [],
         '직군': [],
         '주제': []
+    };
+    let refreshMobileStack = null; // Will be set by initMobileStack
+
+    // Get filtered quote indices based on current filters
+    const getFilteredQuoteIndices = () => {
+        const hasFilters = Object.values(selectedFilters).some(arr => arr.length > 0);
+        if (!hasFilters) {
+            return allQuotes.map((_, i) => i);
+        }
+        return allQuotes.reduce((indices, quote, index) => {
+            const matchesSector = selectedFilters['업종'].length === 0 ||
+                selectedFilters['업종'].includes(quote['업종']);
+            const matchesJob = selectedFilters['직군'].length === 0 ||
+                selectedFilters['직군'].includes(quote['직군']);
+            const matchesTopic = selectedFilters['주제'].length === 0 ||
+                selectedFilters['주제'].includes(quote['주제']);
+            if (matchesSector && matchesJob && matchesTopic) {
+                indices.push(index);
+            }
+            return indices;
+        }, []);
     };
 
     // Seeded random number generator
@@ -540,6 +560,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         updateFilterButtonAvailability();
+
+        // Refresh mobile stack with filtered cards
+        if (refreshMobileStack) {
+            refreshMobileStack();
+        }
     };
 
     const updateFilterButtonAvailability = () => {
@@ -547,6 +572,13 @@ document.addEventListener('DOMContentLoaded', () => {
         allButtons.forEach(btn => {
             const category = btn.dataset.category;
             const value = btn.dataset.value;
+            const isActive = btn.classList.contains('active');
+
+            // Active buttons should always be clickable (to allow deselection)
+            if (isActive) {
+                btn.classList.remove('disabled');
+                return;
+            }
 
             // Check if selecting this value would result in at least one matching card
             // considering the other categories' current selections
@@ -716,19 +748,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update active link on scroll
         const updateActiveNav = () => {
-            const scrollPosition = window.scrollY + 150; // Offset for better detection
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
 
-            let currentSection = '';
-            sections.forEach(sectionId => {
-                const section = document.getElementById(sectionId);
+            // At the very top of the page, default to 'story'
+            if (scrollY < 100) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.section === 'story') {
+                        link.classList.add('active');
+                    }
+                });
+                return;
+            }
+
+            // If at bottom of page, activate the last section (interview-history)
+            const isAtBottom = (scrollY + windowHeight) >= (documentHeight - 50);
+            if (isAtBottom) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.section === 'interview-history') {
+                        link.classList.add('active');
+                    }
+                });
+                return;
+            }
+
+            // Get section positions relative to viewport
+            // Use a detection zone at 100px from top of viewport
+            const detectionPoint = 100;
+            let currentSection = 'story'; // Default to story
+
+            // Check sections in order: story, stats, flipping-cards-section, interview-history
+            // Find the LAST section whose top is above the detection point
+            for (let i = 0; i < sections.length; i++) {
+                const section = document.getElementById(sections[i]);
                 if (section) {
-                    const sectionTop = section.offsetTop;
-                    const sectionHeight = section.offsetHeight;
-                    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                        currentSection = sectionId;
+                    const rect = section.getBoundingClientRect();
+                    // If section top is above detection point (meaning we've scrolled past it)
+                    if (rect.top <= detectionPoint) {
+                        currentSection = sections[i];
                     }
                 }
-            });
+            }
 
             navLinks.forEach(link => {
                 link.classList.remove('active');
@@ -795,15 +858,22 @@ document.addEventListener('DOMContentLoaded', () => {
         let cardHistory = []; // History of dismissed cards for undo
         let usedIndices = new Set(); // Track which quotes have been shown
 
-        // Get a random unused quote index
+        // Get a random unused quote index from filtered quotes
         const getRandomUnusedIndex = () => {
-            if (usedIndices.size >= allQuotes.length) {
-                usedIndices.clear(); // Reset if all quotes have been shown
+            const filteredIndices = getFilteredQuoteIndices();
+            const availableIndices = filteredIndices.filter(i => !usedIndices.has(i));
+
+            if (availableIndices.length === 0) {
+                // Reset if all filtered quotes have been shown
+                usedIndices.clear();
+                const resetIndices = filteredIndices.filter(i => !usedIndices.has(i));
+                if (resetIndices.length === 0) return null;
+                const index = resetIndices[Math.floor(Math.random() * resetIndices.length)];
+                usedIndices.add(index);
+                return index;
             }
-            let index;
-            do {
-                index = Math.floor(Math.random() * allQuotes.length);
-            } while (usedIndices.has(index));
+
+            const index = availableIndices[Math.floor(Math.random() * availableIndices.length)];
             usedIndices.add(index);
             return index;
         };
@@ -1130,14 +1200,21 @@ document.addEventListener('DOMContentLoaded', () => {
             usedIndices.clear();
             prevBtn.disabled = true;
 
-            for (let i = 0; i < VISIBLE_CARDS; i++) {
+            const filteredIndices = getFilteredQuoteIndices();
+            const cardsToShow = Math.min(VISIBLE_CARDS, filteredIndices.length);
+
+            for (let i = 0; i < cardsToShow; i++) {
                 const quoteIndex = getRandomUnusedIndex();
+                if (quoteIndex === null) break;
                 const card = createCardElement(quoteIndex, i);
                 stackContainer.appendChild(card);
                 cardStack.push(card);
                 setupCardDrag(card);
             }
         };
+
+        // Expose initStack for filter refresh
+        refreshMobileStack = initStack;
 
         // Arrow buttons
         prevBtn.addEventListener('click', goToPrev);
@@ -1205,8 +1282,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.dispatchEvent(new Event('scroll'));
 
+        // Mark loading as complete BEFORE hiding screen
+        loadingComplete = true;
+
         // Hide loading screen
         hideLoadingScreen();
+
+        // Only register click/touch listeners AFTER loading is complete
+        ['click', 'touchstart'].forEach(evt => {
+            window.addEventListener(evt, startExperience, { once: true, passive: true });
+        });
     };
 
     initAll();

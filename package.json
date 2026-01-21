@@ -1,0 +1,13 @@
+{
+  "name": "hanbit-labor-rights",
+  "version": "1.0.0",
+  "description": "노동인권 인터랙티브 원페이지 (아임웹 배포용)",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "npx serve .",
+    "preview": "npm run build && npx serve dist"
+  },
+  "keywords": [],
+  "license": "UNLICENSED",
+  "private": true
+}

@@ -16,6 +16,17 @@
     --brand-yellow: #f2c444;
 }
 
+/* Utility classes */
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-only {
+        display: inline;
+    }
+}
+
 /* Custom Scrollbar - WebKit (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
     width: 4px;
@@ -52,6 +63,8 @@ html {
     align-items: center;
     z-index: 9999;
     transition: opacity 0.5s ease, visibility 0.5s ease;
+    touch-action: none;
+    overscroll-behavior: none;
 }
 
 .loading-screen.hidden {
@@ -102,6 +115,8 @@ html {
 
 .loading-text {
     font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.5;
     color: var(--text-light);
     opacity: 0.7;
     margin: 0;
@@ -209,11 +224,19 @@ body {
 body.no-scroll {
     overflow: hidden;
     overscroll-behavior: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
 }
 
 html.no-scroll {
     overflow: hidden;
     overscroll-behavior: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
 }
 
 #scroll-container {
@@ -335,12 +358,20 @@ html.no-scroll {
 }
 
 @media (max-width: 768px) {
+    .navbar-content {
+        padding: 0 0.5rem;
+    }
+
     .navbar-menu {
-        gap: 1rem;
+        gap: 0.75rem;
     }
 
     .nav-link {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+    }
+
+    .brand-logo img {
+        height: 28px;
     }
 }
 
@@ -400,6 +431,8 @@ footer {
 
 .content-section h2 {
     font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.3;
     margin-bottom: 2rem;
     text-align: center;
 }
@@ -419,9 +452,9 @@ footer {
     width: 100%;
     max-width: 1230px;
     /* 본문과 동일한 너비 제한 */
-    font-size: clamp(2.5rem, 5vw, 5.2rem);
-    /* 5.2rem 기준으로 조정 */
-    line-height: 1.6;
+    font-size: clamp(1.5rem, 3vw, 3rem);
+    /* 글씨 크기 축소 */
+    line-height: 2;
     font-weight: 700;
     color: var(--text-light);
     text-align: center;
@@ -443,14 +476,16 @@ footer {
 
 .stats-header h2 {
     font-size: clamp(2.5rem, 4vw, 3.5rem);
+    font-weight: 700;
     margin-bottom: 1rem;
     color: var(--brand-yellow);
 }
 
 .stats-header p {
     font-size: 1.2rem;
-    opacity: 0.7;
     font-weight: 300;
+    line-height: 1.5;
+    opacity: 0.7;
 }
 
 .stats-grid {
@@ -498,7 +533,7 @@ footer {
 }
 
 .stat-card:hover {
-    transform: scale(1.03);
+    transform: none;
 }
 
 .stat-number {
@@ -547,14 +582,25 @@ footer {
 }
 
 @media (max-width: 768px) {
+    #stats.content-section {
+        padding: 2rem 2rem;
+    }
+
+    #stats .container {
+        padding: 0;
+    }
+
     .stats-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
+        gap: 1rem;
+        width: 100%;
+        padding: 0;
     }
 
     .stat-card {
         aspect-ratio: 1 / 1;
         padding: 1.5rem;
+        width: 100%;
     }
 
     .stat-number {
@@ -566,6 +612,25 @@ footer {
         font-size: 1rem;
         margin-bottom: 1rem;
         min-height: auto;
+    }
+}
+
+@media (max-width: 450px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0;
+    }
+
+    .stat-card {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
 }
 
@@ -640,10 +705,17 @@ footer {
 }
 
 .reveal-text {
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-size: clamp(1.25rem, 2.5vw, 2rem);
     line-height: 1.8;
     font-weight: 700;
     word-break: keep-all;
+}
+
+/* Mobile: left-align story text */
+@media (max-width: 768px) {
+    .reveal-container {
+        text-align: left;
+    }
 }
 
 .reveal-paragraph {
@@ -761,6 +833,7 @@ footer {
 .section-title {
     font-size: 2rem;
     font-weight: 700;
+    line-height: 1.3;
     color: var(--text-light);
     text-align: center;
     margin-bottom: 2rem;
@@ -1014,9 +1087,48 @@ footer {
         display: none;
     }
 
-    /* Hide filter section on mobile */
+    /* Mobile filter section - 2 column layout */
     .filter-section {
-        display: none;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding: 1rem;
+        position: static;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .filter-group[data-category="주제"] {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .filter-label {
+        font-size: 0.9rem;
+        padding: 0.3rem 0.6rem;
+        min-width: auto;
+    }
+
+    .filter-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .filter-btn {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.6rem;
+    }
+
+    .scroll-reveal-section {
+        padding-left: 0;
+        padding-right: 0;
     }
 }
 
@@ -1283,6 +1395,7 @@ footer {
 
 .card-modal .marquee-content {
     font-size: 1.3rem;
+    font-weight: 500;
     line-height: 1.8;
     display: block;
     -webkit-line-clamp: unset;
@@ -1291,6 +1404,7 @@ footer {
 
 .card-modal .card-footer-back .card-topic {
     font-size: 1rem;
+    font-weight: 500;
     padding: 0.4rem 1rem;
 }
 
@@ -1338,7 +1452,7 @@ footer {
 /* Sticky Scroll Reveal Section */
 .sticky-reveal-section {
     background-color: var(--bg-dark);
-    padding: 6rem 2rem;
+    padding: 6rem 2rem 0 2rem;
 }
 
 .sticky-reveal-container {
@@ -1395,12 +1509,14 @@ footer {
 .reveal-item h3 {
     font-size: 1.8rem;
     font-weight: 700;
+    line-height: 1.3;
     color: var(--text-light);
     margin-bottom: 1.5rem;
 }
 
 .reveal-item p {
     font-size: 1.1rem;
+    font-weight: 400;
     line-height: 1.8;
     color: var(--text-light);
     opacity: 0.8;
@@ -1441,7 +1557,7 @@ footer {
 
 @media (max-width: 900px) {
     .sticky-reveal-section {
-        padding: 2rem 1rem;
+        padding: 2rem 0.5rem;
     }
 
     .sticky-reveal-content {
@@ -1474,7 +1590,7 @@ footer {
 
     .reveal-item {
         min-height: 50vh;
-        padding: 2rem 1rem;
+        padding: 2rem 0.5rem;
         background-color: var(--bg-dark);
     }
 }
@@ -1512,13 +1628,17 @@ footer {
 }
 
 .footer-row .label {
+    font-size: 1.1rem;
     font-weight: 700;
+    line-height: 1.5;
     min-width: 100px;
     opacity: 0.9;
 }
 
 .footer-row .content {
+    font-size: 1.1rem;
     font-weight: 400;
+    line-height: 1.5;
     opacity: 0.8;
 }
 
@@ -1526,12 +1646,13 @@ footer {
     margin-top: 1rem;
     font-size: 1.1rem;
     font-weight: 400;
+    line-height: 1.5;
     opacity: 0.8;
 }
 
 @media (max-width: 768px) {
     .site-footer {
-        padding: 4rem 1.5rem;
+        padding: 2rem 0.5rem;
     }
 
     .footer-row {
@@ -1542,5 +1663,212 @@ footer {
 
     .footer-row .label {
         min-width: auto;
+    }
+}
+
+/* Memorial Section */
+.memorial-section {
+    background-color: var(--bg-dark);
+    padding: 0 2rem 6rem 2rem;
+    min-height: auto;
+}
+
+.memorial-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+}
+
+.memorial-quote-box {
+    background-color: #4a6a8a;
+    padding: 2.5rem 3rem;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.memorial-quote {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    line-height: 2;
+    color: var(--text-light);
+    margin: 0 0 1.5rem 0;
+    word-break: keep-all;
+}
+
+.memorial-quote .underline {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.memorial-attribution {
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    color: var(--primary);
+    font-weight: 700;
+    margin: 0;
+}
+
+.memorial-logo {
+    width: 180px;
+    height: auto;
+}
+
+.memorial-logo img {
+    width: 100%;
+    height: auto;
+}
+
+.memorial-description {
+    text-align: center;
+}
+
+.memorial-slogan {
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+    color: var(--text-light);
+    margin: 0 0 1.5rem 0;
+}
+
+.memorial-text {
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    line-height: 1.8;
+    color: var(--text-light);
+    opacity: 0.9;
+    margin: 0;
+    word-break: keep-all;
+}
+
+/* Memorial Activity Section */
+.memorial-activity {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.activity-intro {
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    line-height: 1.8;
+    color: var(--primary);
+    margin: 0 0 1.5rem 0;
+    font-weight: 700;
+}
+
+.activity-intro .underline {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.activity-main {
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    line-height: 1.8;
+    color: var(--text-light);
+    margin: 0 0 1.5rem 0;
+    font-weight: 700;
+}
+
+.activity-detail {
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    line-height: 1.8;
+    color: var(--text-light);
+    opacity: 0.9;
+    margin: 0;
+    word-break: keep-all;
+}
+
+/* Contact Cards */
+.contact-cards {
+    display: flex;
+    gap: 0;
+    margin-top: 3rem;
+    border: 2px solid var(--text-light);
+}
+
+.contact-card {
+    flex: 1;
+    display: flex;
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+}
+
+.contact-card:hover {
+    opacity: 0.8;
+}
+
+.contact-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Memorial Closing */
+.memorial-closing {
+    text-align: center;
+    margin-top: 4rem;
+}
+
+.closing-text {
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    line-height: 1.8;
+    color: var(--text-light);
+    margin: 0 0 1.5rem 0;
+    word-break: keep-all;
+}
+
+.closing-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.closing-link {
+    text-decoration: none;
+    text-align: center;
+}
+
+.closing-link-title {
+    display: block;
+    font-size: clamp(1.3rem, 2.5vw, 1.6rem);
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.closing-link-url {
+    display: block;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    color: var(--text-light);
+    opacity: 0.8;
+}
+
+.closing-link:hover .closing-link-title {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .memorial-section {
+        padding: 4rem 1.5rem;
+    }
+
+    .memorial-quote-box {
+        padding: 2rem 1.5rem;
+    }
+
+    .memorial-logo {
+        width: 140px;
+    }
+
+    .memorial-text br {
+        display: none;
+    }
+
+    .activity-detail br {
+        display: none;
+    }
+
+    .contact-cards {
+        flex-direction: row;
     }
 }
